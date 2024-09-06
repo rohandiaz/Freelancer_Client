@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freelancer Project Recommendations</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body class="bg-dark text-light">
+    <div class="container mt-5">
+        <h1 class="text-center">Freelancer Project Recommendations</h1>
+        <form id="freelancerForm" class="mt-4">
+            <div class="mb-3">
+                <label for="freelancerSkills" class="form-label">Enter your skills (comma-separated):</label>
+                <input type="text" class="form-control" id="freelancerSkills" name="freelancer_skills" placeholder="e.g., Python, Data Analysis, Web Development">
+            </div>
+            <button type="submit" class="btn btn-primary">Get Recommendations</button>
+        </form>
+
+        <h2 class="mt-5">Recommended Projects:</h2>
+        <div id="recommendedProjects" class="mt-3"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $('#freelancerForm').on('submit', function(event){
+                event.preventDefault();
+                
+                // Get the input from the freelancer
+                var freelancerSkills = $('#freelancerSkills').val();
+
+                // AJAX POST request to get project recommendations
+                $.ajax({
+                    url: '/recommend_projects',
+                    method: 'POST',
+                    data: {freelancer_skills: freelancerSkills},
+                    success: function(response){
+                        // Clear previous recommendations
+                        $('#recommendedProjects').empty();
+
+                        // Display the recommended projects
+                        if (response.length === 0) {
+                            $('#recommendedProjects').append('<p>No matching projects found.</p>');
+                        } else {
+                            $.each(response, function(index, project){
+                                $('#recommendedProjects').append(`
+                                    <div class="card bg-secondary mb-3">
+                                        <div class="card-body">
+                                            <h5 class="card-title">${project.title}</h5>
+                                            <p class="card-text"><strong>Skills Required:</strong> ${project.skills_required.join(', ')}</p>
+                                            <p class="card-text"><strong>Budget:</strong> $${project.budget}</p>
+                                            <p class="card-text"><strong>Match Score:</strong> ${(project.match_score * 100).toFixed(2)}%</p>
+                                        </div>
+                                    </div>
+                                `);
+                            });
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
